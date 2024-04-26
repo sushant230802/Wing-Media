@@ -20,10 +20,16 @@ try{
             url:"sample_url"
         }
     })
+    const token=await user.generateToken();
+    const options={
+        expires:new Date(Date.now() + 90*24*60*60*1000),
+        httpOnly:"true",
+    }
 
-    res.status(201).json({
-        success:true,
+    res.status(200).cookie("token",token,options).json({
+        success:"true",
         user,
+        token,
     })
 
 } catch(error){
@@ -56,8 +62,12 @@ exports.login= async(req,res)=>{
             })
         }
         const token=await user.generateToken();
+        const options={
+            expires:new Date(Date.now() + 90*24*60*60*1000),
+            httpOnly:"true",
+        }
 
-        res.status(200).cookie("token",token).json({
+        res.status(200).cookie("token",token,options).json({
             success:"true",
             user,
             token,
