@@ -69,6 +69,7 @@ exports.login= async(req,res)=>{
 
         res.status(200).cookie("token",token,options).json({
             success:"true",
+            message:"login successful",
             user,
             token,
         })
@@ -77,5 +78,70 @@ exports.login= async(req,res)=>{
                 success:false,
                 message:error.message,
             })
+    }
+}
+
+exports.logout=async (req,res)=>{
+    try{
+        res.status(200)
+        .cookie("token",null,{expires:new Date(Date.now()), httpOnly:true})
+        .json({
+            success:"true",
+            message:"log out successful",
+        })
+    }
+    catch(error){
+        res.status(500).json({
+            success:"false",
+            message:error.message,
+        })
+    }
+}
+
+exports.followUser=async(req,res)=>{
+    try{
+        const userTofollow= await User.findById(req.params.id);
+        const loggedUser=await User.findById(req.user._id);
+
+        if(!userTofollow){
+            return res.status(404).json({
+                success:"false",
+                message:"user not found",
+            })
+        }
+
+        if(loggedUser.followings.includes(userTofollow._id)){
+            const indexfollowing= loggedUser.followings.indexOf(userTofollow._id);
+            const indexfollowers=userTofollow.followers.indexOf(loggedUser._id);
+
+            loggedUser.followings.splice(indexfollowing,1);
+            userTofollow.followers.splice(indexfollowers,1);
+
+            await loggedUser.save();
+            await userTofollow.save();
+
+            return res.status(200).json({
+                success:"true",
+                message:"user unfollowed",
+            })
+        }
+
+        loggedUser.followings.push(userTofollow._id);
+        userTofollow.followers.push(loggedUser._id);
+
+        await loggedUser.save();
+        await userTofollow.save();
+
+        return res.status(200).json({
+            success:"true",
+            message:"user followed",
+        })
+
+    }
+    catch(error){
+        res.status(500).json({
+            success:"false",
+            message:error.message,
+        })
     }
 }

@@ -110,3 +110,26 @@ exports.deletePost=async (req,res)=>{
         })
     }
 }
+
+exports.getPostOfFollowing=async (req,res)=>{
+    try{
+        const user=await User.findById(req.user._id);
+
+        // inn owner ids is associated jitni bhi posts h unhe search kr lega yeh
+        const posts=await Post.find({
+        owner:{
+            $in:user.followings,
+        }
+        });
+        res.status(200).json({
+            success:"true",
+            posts,
+        })
+    }
+    catch(error){
+        return res.status(500).json({
+            success:"false",
+            message:error.message,
+        })
+    }
+}
