@@ -81,7 +81,7 @@ exports.deletePost=async (req,res)=>{
                 message:"post not found",
             })
         }
-        if(post.owner.toString() != req.user._id.toString()){
+        if(post.owner.toString() !== req.user._id.toString()){
             return res.status(401).json({
                 success:"false",
                 message:"unauthorised"
@@ -132,4 +132,51 @@ exports.getPostOfFollowing=async (req,res)=>{
             message:error.message,
         })
     }
+}
+
+exports.commentOnPost=async (req,res)=>{
+    try{
+
+        const post = await Post.findById(req.params.id);
+
+        if(!post){
+            return res.status(404),json({
+            success:"false",
+            message:"post not found",
+        })
+        }
+        let commentIndex=-1;
+        //checking if comment already exists
+        post.comments.forEach((item,index) => {
+            if(item.user.toString() === req.user._id.toString()){
+                commentIndex=index;
+            }
+        })
+
+        if(commentIndex!== -1){
+            post.comments[commentIndex].comment=req.body.comment;
+            await post.save();
+            return res.status(200).json({
+                success:"true",
+                message:"comment updated",
+            })
+        }
+
+        post.comments.push({
+            user:req.user._id,
+            comment:req.body.comment,
+        })
+        await post.save();
+        return res.status(200).json({
+            success:"true",
+            message:"comment added",
+        })
+        
+    }
+    catch(error){ 
+    return res.status(500).json({
+        success:"false",
+        message:error.message,
+    })
+}
 }
