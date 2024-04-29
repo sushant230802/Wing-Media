@@ -11,7 +11,7 @@ app.use(express.urlencoded({extended: true}));
 app.use(cookieParser());
 
 //importing routes
-const post=require("./routes/post");
+const post=require("./routes/post");  //import post from "./routes/post"
 const user=require("./routes/user");
 
 //using routes
